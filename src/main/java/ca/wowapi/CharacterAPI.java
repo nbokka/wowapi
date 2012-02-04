@@ -61,15 +61,15 @@ public class CharacterAPI extends AbstractAPI {
 		return this.getCharacterAllInfo(name, realm, region, 0);
 	}
 
-	public Character getCharacterAllInfo(String name, String realm, String region, long lastModified) {
+	public Character getCharacterAllInfo(String name, String realmSlug, String region, long lastModified) {
 		Character character = null;
 
 		String URL = CHARACTER_API_URL + "?fields=items,guild,achievements";
-		String finalURL = URL.replace("%region", region).replace("%realm", encode(realm)).replace("%name", encode(name));
+		String finalURL = URL.replace("%region", region).replace("%realm", realmSlug).replace("%name", encode(name));
 		try {
 			JSONObject jsonobject = getJSONFromRequest(finalURL, lastModified);
 
-			character = this.getCharacterBasicInfo(name, realm, region);
+			character = this.getCharacterBasicInfo(name, realmSlug, region);
 			JSONArray jarrayAchievementsCompleted = jsonobject.getJSONObject("achievements").getJSONArray("achievementsCompleted");
 			JSONArray jarrayAchievementsCompletedTimestamp = jsonobject.getJSONObject("achievements").getJSONArray("achievementsCompletedTimestamp");
 			JSONArray jarrayCriteria = jsonobject.getJSONObject("achievements").getJSONArray("criteria");

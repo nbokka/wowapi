@@ -300,7 +300,7 @@ public class Item {
 	public String toString() {
 		StringBuffer output = new StringBuffer();
 		output.append("id: " + id + "\n");
-		output.append("disenchangintSkillRank: " + disenchantingSkillRank + "\n");
+		output.append("disenchantingSkillRank: " + disenchantingSkillRank + "\n");
 		output.append("description: " + description + "\n");
 		output.append("name: " + name + "\n");
 		output.append("stackable: " + stackable + "\n");

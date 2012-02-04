@@ -3,19 +3,16 @@ package ca.wowapi;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.wowapi.entities.Auction;
+import ca.wowapi.entities.AuctionData;
 
 public class AuctionAPITest {
 
 	private static final String TEST_REALM = "Ravencrest";
-	private static final String TEST_FACTION = "alliance";
 
 	static AuctionAPI auctionAPI;
 
@@ -45,9 +42,9 @@ public class AuctionAPITest {
 
 	@Test
 	public void getAllAuctionDataTest() {
-		HashMap<String, List<Auction>> auctionData = auctionAPI.getAllAuctionData(TEST_REALM, AuctionAPI.REGION_US);
-		Assert.assertNotNull(auctionData.get(TEST_FACTION));
-		Assert.assertNotNull(auctionData.get(TEST_FACTION).get(0));
+		AuctionData auctionData = auctionAPI.getAllAuctionData(TEST_REALM, AuctionAPI.REGION_US);
+		Assert.assertNotNull(auctionData.getAllianceAuctions());
+		Assert.assertNotNull(auctionData.getAllianceAuctions()[0]);
 	}
 
 }
