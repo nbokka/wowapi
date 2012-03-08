@@ -2,13 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>rpgtools-parent</artifactId>
+		<artifactId>auctiontools</artifactId>
 		<groupId>com.noob</groupId>
 		<version>1.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
-	<artifactId>wow-api</artifactId>
-	<packaging>jar</packaging>
-
+	<artifactId>blizzard-wow-api</artifactId>
+	<name>Blizzard WoW API</name>
+	<description>API for communication with the WOW REST API exposed by Blizzard.</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -19,12 +20,16 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.10</version>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
-		</dependency>		
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.1.3</version>			
+		</dependency>
 	</dependencies>
-
 </project>

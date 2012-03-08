@@ -1,38 +1,40 @@
 package ca.wowapi.entities;
 
+import java.util.List;
+
 public class AuctionData {
 
-	private Auction[] allianceAuctions;
+	private List<Auction> allianceAuctions;
 
-	private Auction[] hordeAuctions;
+	private List<Auction> hordeAuctions;
 
-	private Auction[] neutralAuctions;
+	private List<Auction> neutralAuctions;
 
 	public AuctionData() {
 
 	}
 
-	public Auction[] getAllianceAuctions() {
+	public List<Auction> getAllianceAuctions() {
 		return allianceAuctions;
 	}
 
-	public Auction[] getHordeAuctions() {
+	public List<Auction> getHordeAuctions() {
 		return hordeAuctions;
 	}
 
-	public Auction[] getNeutralAuctions() {
+	public List<Auction> getNeutralAuctions() {
 		return neutralAuctions;
 	}
 
-	public void setAllianceAuctions(Auction[] allianceAuctions) {
+	public void setAllianceAuctions(List<Auction> allianceAuctions) {
 		this.allianceAuctions = allianceAuctions;
 	}
 
-	public void setHordeAuctions(Auction[] hordeAuctions) {
+	public void setHordeAuctions(List<Auction> hordeAuctions) {
 		this.hordeAuctions = hordeAuctions;
 	}
 
-	public void setNeutralAuctions(Auction[] neutralAuctions) {
+	public void setNeutralAuctions(List<Auction> neutralAuctions) {
 		this.neutralAuctions = neutralAuctions;
 	}
 

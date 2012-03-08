@@ -1,8 +1,12 @@
 package ca.wowapi.entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Item {
+public class Item implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	private int baseArmor;
 
 	private BonusStats bonusStats;
@@ -161,6 +165,10 @@ public class Item {
 		return sellPrice;
 	}
 
+	public int getStackable() {
+		return stackable;
+	}
+
 	public WeaponInfo getWeaponInfo() {
 		return weaponInfo;
 	}
@@ -175,10 +183,6 @@ public class Item {
 
 	public boolean isHasSockets() {
 		return hasSockets;
-	}
-
-	public int getStackable() {
-		return stackable;
 	}
 
 	public void setAuctionable(boolean isAuctionable) {

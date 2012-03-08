@@ -1,5 +1,8 @@
 package ca.wowapi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -7,6 +10,7 @@ import org.json.JSONObject;
 
 import ca.wowapi.entities.Auction;
 import ca.wowapi.entities.AuctionData;
+import ca.wowapi.exceptions.NotModifiedException;
 
 public class AuctionAPI extends AbstractAPI {
 
@@ -33,6 +37,7 @@ public class AuctionAPI extends AbstractAPI {
 
 		String auctionUrl = null;
 		try {
+
 			JSONObject jsonobject = getJSONFromRequest(finalURL);
 			if (null != jsonobject) {
 				auctionUrl = jsonobject.getJSONArray("files").getJSONObject(0).getString("url");
@@ -74,36 +79,70 @@ public class AuctionAPI extends AbstractAPI {
 			JSONObject jsonobject = null;
 			String auctionUrl = this.getAuctionUrl(realm, region);
 			if (null != auctionUrl) {
-				jsonobject = getJSONFromRequest(auctionUrl);
+				jsonobject = getJSONFromRequest(auctionUrl, 0);
 			}
 
-			if (null != jsonobject) {
-				auctionData = new AuctionData();
+			try {
+				auctionData = this.getAllAuctionData(auctionUrl, 0);
 
-				Auction[] allianceAuctions = this.loadAuctionArray(jsonobject.getJSONObject(FACTION_ALLIANCE).getJSONArray("auctions"));
-				auctionData.setAllianceAuctions(allianceAuctions);
-				log.debug("Number of auctions found for Faction: " + FACTION_ALLIANCE + " Count: " + allianceAuctions.length);
+				if (null != auctionData) {
+					List<Auction> allianceAuctions = this.loadAuctions(jsonobject.getJSONObject(FACTION_ALLIANCE).getJSONArray("auctions"));
+					auctionData.setAllianceAuctions(allianceAuctions);
+					log.debug("Number of auctions found for Faction: " + FACTION_ALLIANCE + " Count: " + allianceAuctions.size());
 
-				Auction[] hordeAuctions = this.loadAuctionArray(jsonobject.getJSONObject(FACTION_HORDE).getJSONArray("auctions"));
-				auctionData.setHordeAuctions(hordeAuctions);
-				log.debug("Number of auctions found for Faction: " + FACTION_HORDE + " Count: " + hordeAuctions.length);
+					List<Auction> hordeAuctions = this.loadAuctions(jsonobject.getJSONObject(FACTION_HORDE).getJSONArray("auctions"));
+					auctionData.setHordeAuctions(hordeAuctions);
+					log.debug("Number of auctions found for Faction: " + FACTION_HORDE + " Count: " + hordeAuctions.size());
 
-				Auction[] neutralAuctions = this.loadAuctionArray(jsonobject.getJSONObject(FACTION_NEUTRAL).getJSONArray("auctions"));
-				auctionData.setNeutralAuctions(neutralAuctions);
-				log.debug("Number of auctions found for Faction: " + FACTION_NEUTRAL + " Count: " + neutralAuctions.length);
+					List<Auction> neutralAuctions = this.loadAuctions(jsonobject.getJSONObject(FACTION_NEUTRAL).getJSONArray("auctions"));
+					auctionData.setNeutralAuctions(neutralAuctions);
+					log.debug("Number of auctions found for Faction: " + FACTION_NEUTRAL + " Count: " + neutralAuctions.size());
 
-			} else {
-				log.error("Unable to retrive auction data for Realm: " + realm + " Region: " + region);
+				} else {
+					log.error("Unable to retrive auction data for Realm: " + realm + " Region: " + region);
+				}
+				log.debug("Finished retriving auction data for Realm: " + realm + " Region: " + region);
+			} catch (NotModifiedException e) {
+				log.warn("Auctions not modified since last run!");
 			}
-			log.debug("Finished retriving auction data for Realm: " + realm + " Region: " + region);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return auctionData;
 	}
 
-	private Auction[] loadAuctionArray(JSONArray jAuctionList) throws JSONException {
-		Auction[] auctionArray = new Auction[jAuctionList.length()];
+	public AuctionData getAllAuctionData(String auctionUrl, long lastModified) throws NotModifiedException {
+		AuctionData auctionData = null;
+		try {
+
+			JSONObject jsonobject = getJSONFromRequest(auctionUrl, lastModified);
+
+			if (null != jsonobject) {
+				auctionData = new AuctionData();
+
+				List<Auction> allianceAuctions = this.loadAuctions(jsonobject.getJSONObject(FACTION_ALLIANCE).getJSONArray("auctions"));
+				auctionData.setAllianceAuctions(allianceAuctions);
+				log.debug("Number of auctions found for Faction: " + FACTION_ALLIANCE + " Count: " + allianceAuctions.size());
+
+				List<Auction> hordeAuctions = this.loadAuctions(jsonobject.getJSONObject(FACTION_HORDE).getJSONArray("auctions"));
+				auctionData.setHordeAuctions(hordeAuctions);
+				log.debug("Number of auctions found for Faction: " + FACTION_HORDE + " Count: " + hordeAuctions.size());
+
+				List<Auction> neutralAuctions = this.loadAuctions(jsonobject.getJSONObject(FACTION_NEUTRAL).getJSONArray("auctions"));
+				auctionData.setNeutralAuctions(neutralAuctions);
+				log.debug("Number of auctions found for Faction: " + FACTION_NEUTRAL + " Count: " + neutralAuctions.size());
+
+			}
+		} catch (NotModifiedException n) {
+			throw n;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return auctionData;
+	}
+
+	private List<Auction> loadAuctions(JSONArray jAuctionList) throws JSONException {
+		List<Auction> auctions = new ArrayList<Auction>(jAuctionList.length());
 		for (int j = 0; j < jAuctionList.length(); j++) {
 			Auction auctionItem = new Auction();
 			auctionItem.setOwner(jAuctionList.getJSONObject(j).getString("owner"));
@@ -113,9 +152,9 @@ public class AuctionAPI extends AbstractAPI {
 			auctionItem.setBuyout(jAuctionList.getJSONObject(j).getLong("buyout"));
 			auctionItem.setQuantity(jAuctionList.getJSONObject(j).getInt("quantity"));
 			auctionItem.setTimeLeft(jAuctionList.getJSONObject(j).getString("timeLeft"));
-			auctionArray[j] = auctionItem;
+			auctions.add(auctionItem);
 		}
-		return auctionArray;
+		return auctions;
 	}
 
 }

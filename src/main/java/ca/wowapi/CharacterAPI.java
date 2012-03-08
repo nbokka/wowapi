@@ -69,35 +69,37 @@ public class CharacterAPI extends AbstractAPI {
 		try {
 			JSONObject jsonobject = getJSONFromRequest(finalURL, lastModified);
 
-			character = this.getCharacterBasicInfo(name, realmSlug, region);
-			JSONArray jarrayAchievementsCompleted = jsonobject.getJSONObject("achievements").getJSONArray("achievementsCompleted");
-			JSONArray jarrayAchievementsCompletedTimestamp = jsonobject.getJSONObject("achievements").getJSONArray("achievementsCompletedTimestamp");
-			JSONArray jarrayCriteria = jsonobject.getJSONObject("achievements").getJSONArray("criteria");
-			JSONArray jarrayCriteriaQuantity = jsonobject.getJSONObject("achievements").getJSONArray("criteriaQuantity");
-			JSONArray jarrayCriteriaTimestamp = jsonobject.getJSONObject("achievements").getJSONArray("criteriaTimestamp");
+			if (null != jsonobject) {
+				character = this.getCharacterBasicInfo(name, realmSlug, region);
+				JSONArray jarrayAchievementsCompleted = jsonobject.getJSONObject("achievements").getJSONArray("achievementsCompleted");
+				JSONArray jarrayAchievementsCompletedTimestamp = jsonobject.getJSONObject("achievements").getJSONArray("achievementsCompletedTimestamp");
+				JSONArray jarrayCriteria = jsonobject.getJSONObject("achievements").getJSONArray("criteria");
+				JSONArray jarrayCriteriaQuantity = jsonobject.getJSONObject("achievements").getJSONArray("criteriaQuantity");
+				JSONArray jarrayCriteriaTimestamp = jsonobject.getJSONObject("achievements").getJSONArray("criteriaTimestamp");
 
-			List<Achievement> achievementList = new ArrayList<Achievement>();
-			for (int i = 0; i < jarrayAchievementsCompleted.length(); i++) {
-				Achievement achievemenet = new Achievement();
-				achievemenet.setAid(jarrayAchievementsCompleted.getInt(i));
-				achievemenet.setTimestamp(jarrayAchievementsCompletedTimestamp.getLong(i));
-				achievemenet.setCompleted(true);
-				achievemenet.setCriteriaQuantity(1);
-				achievementList.add(achievemenet);
+				List<Achievement> achievementList = new ArrayList<Achievement>();
+				for (int i = 0; i < jarrayAchievementsCompleted.length(); i++) {
+					Achievement achievemenet = new Achievement();
+					achievemenet.setAid(jarrayAchievementsCompleted.getInt(i));
+					achievemenet.setTimestamp(jarrayAchievementsCompletedTimestamp.getLong(i));
+					achievemenet.setCompleted(true);
+					achievemenet.setCriteriaQuantity(1);
+					achievementList.add(achievemenet);
+				}
+				character.setAchievements(achievementList);
+
+				achievementList = new ArrayList<Achievement>();
+				for (int i = 0; i < jarrayCriteria.length(); i++) {
+					Achievement achievemenet = new Achievement();
+					achievemenet.setAid(jarrayCriteria.getInt(i));
+					achievemenet.setTimestamp(jarrayCriteriaTimestamp.getLong(i));
+					achievemenet.setCriteriaQuantity(jarrayCriteriaQuantity.getLong(i));
+					achievemenet.setCompleted(false);
+					achievementList.add(achievemenet);
+				}
+				character.setCriteria(achievementList);
+
 			}
-			character.setAchievements(achievementList);
-
-			achievementList = new ArrayList<Achievement>();
-			for (int i = 0; i < jarrayCriteria.length(); i++) {
-				Achievement achievemenet = new Achievement();
-				achievemenet.setAid(jarrayCriteria.getInt(i));
-				achievemenet.setTimestamp(jarrayCriteriaTimestamp.getLong(i));
-				achievemenet.setCriteriaQuantity(jarrayCriteriaQuantity.getLong(i));
-				achievemenet.setCompleted(false);
-				achievementList.add(achievemenet);
-			}
-			character.setCriteria(achievementList);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -115,27 +117,29 @@ public class CharacterAPI extends AbstractAPI {
 		try {
 			JSONObject jsonobject = getJSONFromRequest(finalURL, lastModified);
 
-			character = new Character();
-			character.setName(jsonobject.getString("name"));
-			character.setRealm(jsonobject.getString("realm"));
-			character.setRegion(region);
-			character.setCclass(CLASS_LIST.get(jsonobject.getInt("class")));
-			character.setRace(RACE_LIST.get(jsonobject.getInt("race")));
-			character.setLevel(jsonobject.getInt("level"));
-			character.setPoints(jsonobject.getInt("achievementPoints"));
-			character.setGender(GENDER_LIST.get(jsonobject.getInt("gender")));
-			if (jsonobject.has("guild")) {
-				character.setGuildName(jsonobject.getJSONObject("guild").getString("name"));
-			}
+			if (null != jsonobject) {
+				character = new Character();
+				character.setName(jsonobject.getString("name"));
+				character.setRealm(jsonobject.getString("realm"));
+				character.setRegion(region);
+				character.setCclass(CLASS_LIST.get(jsonobject.getInt("class")));
+				character.setRace(RACE_LIST.get(jsonobject.getInt("race")));
+				character.setLevel(jsonobject.getInt("level"));
+				character.setPoints(jsonobject.getInt("achievementPoints"));
+				character.setGender(GENDER_LIST.get(jsonobject.getInt("gender")));
+				if (jsonobject.has("guild")) {
+					character.setGuildName(jsonobject.getJSONObject("guild").getString("name"));
+				}
 
-			if (jsonobject.getInt("race") == 4 || jsonobject.getInt("race") == 11 || jsonobject.getInt("race") == 1 || jsonobject.getInt("race") == 3 || jsonobject.getInt("race") == 7
-					|| jsonobject.getInt("race") == 22) {
-				character.setFaction("Alliance");
-			} else if (jsonobject.getInt("race") == 6 || jsonobject.getInt("race") == 10 || jsonobject.getInt("race") == 9 || jsonobject.getInt("race") == 2 || jsonobject.getInt("race") == 5
-					|| jsonobject.getInt("race") == 8) {
-				character.setFaction("Horde");
-			}
+				if (jsonobject.getInt("race") == 4 || jsonobject.getInt("race") == 11 || jsonobject.getInt("race") == 1 || jsonobject.getInt("race") == 3 || jsonobject.getInt("race") == 7
+						|| jsonobject.getInt("race") == 22) {
+					character.setFaction("Alliance");
+				} else if (jsonobject.getInt("race") == 6 || jsonobject.getInt("race") == 10 || jsonobject.getInt("race") == 9 || jsonobject.getInt("race") == 2 || jsonobject.getInt("race") == 5
+						|| jsonobject.getInt("race") == 8) {
+					character.setFaction("Horde");
+				}
 
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

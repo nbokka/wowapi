@@ -1,6 +1,8 @@
 package ca.wowapi;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
@@ -8,15 +10,22 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.ContentEncodingHttpClient;
+import org.apache.http.impl.cookie.DateUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import ca.wowapi.exceptions.InternalServerErrorException;
 import ca.wowapi.exceptions.InvalidApplicationSignatureException;
 import ca.wowapi.exceptions.NotModifiedException;
 import ca.wowapi.exceptions.TooManyRequestsException;
@@ -41,11 +50,11 @@ public class AbstractAPI {
 		this.privateKey = privateKey;
 	}
 
-	public JSONObject getJSONFromRequest(String url) throws NotModifiedException, InvalidApplicationSignatureException, TooManyRequestsException {
+	public JSONObject getJSONFromRequest(String url) throws NotModifiedException, InvalidApplicationSignatureException, TooManyRequestsException, InternalServerErrorException {
 		return this.getJSONFromRequest(url, 0);
 	}
 
-	public JSONObject getJSONFromRequest(String url, long lastModifiedDate) throws NotModifiedException, InvalidApplicationSignatureException, TooManyRequestsException {
+	public JSONObject getJSONFromRequest(String url, long lastModifiedDate) throws NotModifiedException, InvalidApplicationSignatureException, TooManyRequestsException, InternalServerErrorException {
 		JSONObject jsonobject = null;
 
 		String str = null;
@@ -68,6 +77,9 @@ public class AbstractAPI {
 						} else if (jsonobject.getString("reason").contains("too many requests") || jsonobject.getString("reason").contains("Daily limit exceeded")) {
 							log.error("Too many requests made against the Blizzard WOW API.");
 							throw new TooManyRequestsException();
+						} else if(jsonobject.getString("reason").contains("Internal server error.")){
+							log.error("WOW Internal server error.");
+							throw new InternalServerErrorException();
 						}
 					}
 
@@ -100,24 +112,73 @@ public class AbstractAPI {
 
 	public String getStringJSONFromRequest(String url, long lastModified) throws NotModifiedException {
 
-		String str = null;
+		String str = new String();
 		try {
-			URL jURL = new URL(url);
-			HttpURLConnection urlConnection = (HttpURLConnection) jURL.openConnection();
-			urlConnection.setReadTimeout(30);
+			ContentEncodingHttpClient client = new ContentEncodingHttpClient();
+			HttpGet httpget = new HttpGet(url);
 			if (lastModified != 0) {
-				urlConnection.setIfModifiedSince(lastModified);
+				httpget.addHeader("If-Modified-Since", DateUtils.formatDate(new Date(lastModified), "EEE, d MMM yyyy HH:mm:ss 'GMT'"));
+			}
+			httpget.addHeader("Accept-Encoding", "gzip");
+
+			HttpResponse response = client.execute(httpget);
+
+			if (304 == response.getStatusLine().getStatusCode()) {
+				httpget.abort();
+				throw new NotModifiedException();
 			}
 
-			str = readJSONStream(urlConnection);
-		} catch (SocketTimeoutException e) {
-			log.trace("Socket timed out, returning null for response.");
-		} catch (IOException e1) {
-			e1.printStackTrace();
+			HttpEntity entity = response.getEntity();
+			InputStream instream = entity.getContent();
+			try {
+
+				BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
+				// do something useful with the response
+
+				final char[] buffer = new char[0x1000];
+				StringBuilder out = new StringBuilder();
+				int read;
+				do {
+					read = reader.read(buffer, 0, buffer.length);
+					if (read > 0) {
+						out.append(buffer, 0, read);
+					}
+				} while (read >= 0);
+
+				str = out.toString();
+				reader.close();
+			} catch (IOException ex) {
+
+				// In case of an IOException the connection will be released
+				// back to the connection manager automatically
+				throw ex;
+
+			} catch (RuntimeException ex) {
+
+				// In case of an unexpected exception you may want to abort
+				// the HTTP request in order to shut down the underlying
+				// connection and release it back to the connection manager.
+				httpget.abort();
+				throw ex;
+
+			} finally {
+
+				// Closing the input stream will trigger connection release
+				instream.close();
+
+			}
+
+			// When HttpClient instance is no longer needed, shut down the connection manager to ensure immediate deallocation of all system resources
+			client.getConnectionManager().shutdown();
+		} catch (NotModifiedException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return str;
 	}
 
+	@Deprecated
 	public String getStringJSONFromRequestAuth(String url, String publicKey, String privateKey) {
 		String string = null;
 		try {
@@ -128,6 +189,8 @@ public class AbstractAPI {
 		return string;
 	}
 
+	@Deprecated
+	// Depreciating this method so I remember to convert it to HTTPClient to gain the effeciency of Gzip compression
 	public String getStringJSONFromRequestAuth(String url, String publicKey, String privateKey, long lastModified) throws NotModifiedException {
 
 		String UrlPath = null;

@@ -2,6 +2,7 @@ package ca.wowapi;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -11,8 +12,11 @@ import ca.wowapi.entities.ItemSource;
 import ca.wowapi.entities.ItemSpell;
 import ca.wowapi.entities.Spell;
 import ca.wowapi.entities.WeaponInfo;
+import ca.wowapi.exceptions.InternalServerErrorException;
 
 public class ItemAPI extends AbstractAPI {
+
+	private final Logger log = Logger.getLogger(this.getClass());
 
 	public static final String ITEM_API_URL = "http://%region.battle.net/api/wow/item/%id";
 
@@ -24,22 +28,36 @@ public class ItemAPI extends AbstractAPI {
 		super(publicKey, privateKey);
 	}
 
-	public Item getItem(String itemId, String region) {
+	public Item getItem(String itemId, String region) throws InternalServerErrorException {
 		Item item = null;
 
 		String finalURL = ITEM_API_URL.replace("%region", region).replace("%id", itemId);
 		try {
 			JSONObject jsonobject = getJSONFromRequest(finalURL);
-
 			item = new Item();
-			item.setId(jsonobject.getInt("id"));
+
+			if (jsonobject.has("id")) {
+				item.setId(jsonobject.getInt("id"));
+			} else {
+				// Sometimes the server responds with nothing so return null
+				log.warn("No item id returned... returning null.");
+				return null;
+			}
 			if (jsonobject.has("disenchantingSkillRank")) {
 				item.setDisenchantingSkillRank(jsonobject.getInt("disenchantingSkillRank"));
 			}
-			item.setDescription(jsonobject.getString("description"));
-			item.setName(jsonobject.getString("name"));
-			item.setSellPrice(jsonobject.getInt("stackable"));
-			item.setItemBind(jsonobject.getInt("itemBind"));
+			if (jsonobject.has("description")) {
+				item.setDescription(jsonobject.getString("description"));
+			}
+			if (jsonobject.has("name")) {
+				item.setName(jsonobject.getString("name"));
+			}
+			if (jsonobject.has("stackable")) {
+				item.setSellPrice(jsonobject.getInt("stackable"));
+			}
+			if (jsonobject.has("itemBind")) {
+				item.setItemBind(jsonobject.getInt("itemBind"));
+			}
 			item.setBonusStats(null);
 			if (jsonobject.has("itemSpells")) {
 
@@ -56,7 +74,9 @@ public class ItemAPI extends AbstractAPI {
 					spell.setId(spellObj.getInt("id"));
 					spell.setName(spellObj.getString("name"));
 					spell.setDescription(spellObj.getString("description"));
-					spell.setCastTime(spellObj.getString("castTime"));
+
+					// TODO: need to figure out why this isn't working
+					// spell.setCastTime(spellObj.getString("castTime"));
 
 					itemSpell.setSpell(spell);
 					itemSpell.setnCharges(itemSpellObj.getInt("nCharges"));
@@ -70,11 +90,18 @@ public class ItemAPI extends AbstractAPI {
 			}
 
 			item.setItemSpells(null);
-			item.setBuyPrice(jsonobject.getLong("buyPrice"));
-			item.setItemClass(jsonobject.getInt("itemClass"));
-			item.setItemSubClass(jsonobject.getInt("itemSubClass"));
-			item.setContainerSlots(jsonobject.getInt("containerSlots"));
-
+			if (jsonobject.has("buyPrice")) {
+				item.setBuyPrice(jsonobject.getLong("buyPrice"));
+			}
+			if (jsonobject.has("itemClass")) {
+				item.setItemClass(jsonobject.getInt("itemClass"));
+			}
+			if (jsonobject.has("itemSubClass")) {
+				item.setItemSubClass(jsonobject.getInt("itemSubClass"));
+			}
+			if (jsonobject.has("containerSlots")) {
+				item.setContainerSlots(jsonobject.getInt("containerSlots"));
+			}
 			if (jsonobject.has("weaponInfo")) {
 				JSONObject weaponObj = jsonobject.getJSONObject("weaponInfo");
 				JSONObject damageObj = weaponObj.getJSONObject("damage");
@@ -91,18 +118,42 @@ public class ItemAPI extends AbstractAPI {
 				item.setWeaponInfo(weaponInfo);
 			}
 
-			item.setInventoryType(jsonobject.getInt("inventoryType"));
-			item.setEquippable(jsonobject.getBoolean("equippable"));
-			item.setItemLevel(jsonobject.getInt("itemLevel"));
-			item.setMaxCount(jsonobject.getInt("maxCount"));
-			item.setMaxDurability(jsonobject.getInt("maxDurability"));
-			item.setMinFactionId(jsonobject.getInt("minFactionId"));
-			item.setMinReputation(jsonobject.getInt("minReputation"));
-			item.setQuality(jsonobject.getInt("quality"));
-			item.setSellPrice(jsonobject.getLong("sellPrice"));
-			item.setRequiredLevel(jsonobject.getInt("requiredLevel"));
-			item.setRequiredSkill(jsonobject.getInt("requiredSkill"));
-			item.setRequiredSkillRank(jsonobject.getInt("requiredSkillRank"));
+			if (jsonobject.has("inventoryType")) {
+				item.setInventoryType(jsonobject.getInt("inventoryType"));
+			}
+			if (jsonobject.has("equippable")) {
+				item.setEquippable(jsonobject.getBoolean("equippable"));
+			}
+			if (jsonobject.has("itemLevel")) {
+				item.setItemLevel(jsonobject.getInt("itemLevel"));
+			}
+			if (jsonobject.has("maxCount")) {
+				item.setMaxCount(jsonobject.getInt("maxCount"));
+			}
+			if (jsonobject.has("maxDurability")) {
+				item.setMaxDurability(jsonobject.getInt("maxDurability"));
+			}
+			if (jsonobject.has("minFactionId")) {
+				item.setMinFactionId(jsonobject.getInt("minFactionId"));
+			}
+			if (jsonobject.has("minReputation")) {
+				item.setMinReputation(jsonobject.getInt("minReputation"));
+			}
+			if (jsonobject.has("quality")) {
+				item.setQuality(jsonobject.getInt("quality"));
+			}
+			if (jsonobject.has("sellPrice")) {
+				item.setSellPrice(jsonobject.getLong("sellPrice"));
+			}
+			if (jsonobject.has("requiredLevel")) {
+				item.setRequiredLevel(jsonobject.getInt("requiredLevel"));
+			}
+			if (jsonobject.has("requiredSkill")) {
+				item.setRequiredSkill(jsonobject.getInt("requiredSkill"));
+			}
+			if (jsonobject.has("requiredSkillRank")) {
+				item.setRequiredSkillRank(jsonobject.getInt("requiredSkillRank"));
+			}
 
 			if (jsonobject.has("itemSource")) {
 				JSONObject itemSourceObj = jsonobject.getJSONObject("itemSource");
@@ -112,14 +163,21 @@ public class ItemAPI extends AbstractAPI {
 				itemSource.setSourceType(itemSourceObj.getString("sourceType"));
 			}
 
-			item.setBaseArmor(jsonobject.getInt("baseArmor"));
-			item.setHasSockets(jsonobject.getBoolean("hasSockets"));
-			item.setAuctionable(jsonobject.getBoolean("isAuctionable"));
-
+			if (jsonobject.has("baseArmor")) {
+				item.setBaseArmor(jsonobject.getInt("baseArmor"));
+			}
+			if (jsonobject.has("hasSockets")) {
+				item.setHasSockets(jsonobject.getBoolean("hasSockets"));
+			}
+			if (jsonobject.has("isAuctionable")) {
+				item.setAuctionable(jsonobject.getBoolean("isAuctionable"));
+			}
+		} catch (InternalServerErrorException e) {
+			throw e;
 		} catch (Exception e) {
+			log.error("Error retrieving item.");
 			e.printStackTrace();
 		}
 		return item;
 	}
-	
 }

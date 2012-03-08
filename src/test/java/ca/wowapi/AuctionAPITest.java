@@ -12,7 +12,7 @@ import ca.wowapi.entities.AuctionData;
 
 public class AuctionAPITest {
 
-	private static final String TEST_REALM = "Ravencrest";
+	private static final String TEST_REALM = "Medivh";
 
 	static AuctionAPI auctionAPI;
 
@@ -24,6 +24,7 @@ public class AuctionAPITest {
 	@Test
 	public void getAuctionUrlTest() {
 		String url = auctionAPI.getAuctionUrl(TEST_REALM, AuctionAPI.REGION_US);
+		System.out.println(url);
 		Assert.assertNotNull(url);
 		Assert.assertTrue(url.matches(".*auction-data.*auctions.json.*"));
 	}
@@ -44,7 +45,7 @@ public class AuctionAPITest {
 	public void getAllAuctionDataTest() {
 		AuctionData auctionData = auctionAPI.getAllAuctionData(TEST_REALM, AuctionAPI.REGION_US);
 		Assert.assertNotNull(auctionData.getAllianceAuctions());
-		Assert.assertNotNull(auctionData.getAllianceAuctions()[0]);
+		Assert.assertNotNull(auctionData.getAllianceAuctions().get(0));
 	}
 
 }

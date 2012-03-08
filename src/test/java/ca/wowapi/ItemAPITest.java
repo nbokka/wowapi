@@ -21,7 +21,7 @@ public class ItemAPITest {
 	}
 
 	@Test
-	public void getItemTest() {
+	public void getItemTest() throws Exception{
 		for (int i = 0; i < TEST_ITEMS.length; i++) {
 			Item item = itemAPI.getItem(TEST_ITEMS[i], ItemAPI.REGION_US);		
 			Assert.assertNotNull(item);

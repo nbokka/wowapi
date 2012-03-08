@@ -1,6 +1,6 @@
 package ca.wowapi.exceptions;
 
-public class ServerUnavailableException extends Exception {
+public class InternalServerErrorException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 }

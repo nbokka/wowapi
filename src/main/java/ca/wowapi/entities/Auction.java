@@ -1,6 +1,10 @@
 package ca.wowapi.entities;
 
-public class Auction {
+import java.io.Serializable;
+
+public class Auction implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private long bid;
 
