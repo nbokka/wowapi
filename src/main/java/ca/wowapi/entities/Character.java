@@ -2,6 +2,8 @@ package ca.wowapi.entities;
 
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Character {
 
 	private List<Achievement> achievements;

@@ -1,12 +1,17 @@
 package ca.wowapi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ca.wowapi.entities.Auction;
 import ca.wowapi.entities.Realm;
 
 public class RealmAPI extends AbstractAPI {
@@ -34,12 +39,17 @@ public class RealmAPI extends AbstractAPI {
 			jsonobject = jarray.getJSONObject(0);
 
 			realm = new Realm();
+			realm = this.getRealm(jsonobject);
+			/*
 			realm.setName(jsonobject.getString("name"));
 			realm.setPopulation(jsonobject.getString("population"));
 			realm.setType(jsonobject.getString("type"));
 			realm.setSlug(jsonobject.getString("slug"));
 			realm.setStatus(jsonobject.getBoolean("status"));
 			realm.setQueue(jsonobject.getBoolean("queue"));
+			*/
+			
+			
 		} catch (Exception e) {
 			log.error("Error retrieving realm.", e);
 			e.printStackTrace();
@@ -61,12 +71,15 @@ public class RealmAPI extends AbstractAPI {
 				jsonobject = jarray.getJSONObject(i);
 
 				Realm realm = new Realm();
+				realm = this.getRealm(jsonobject);
+				/*
 				realm.setName(jsonobject.getString("name"));
 				realm.setPopulation(jsonobject.getString("population"));
 				realm.setType(jsonobject.getString("type"));
 				realm.setSlug(jsonobject.getString("slug"));
 				realm.setStatus(jsonobject.getBoolean("status"));
 				realm.setQueue(jsonobject.getBoolean("queue"));
+				*/
 
 				list.add(realm);
 			}
@@ -90,7 +103,7 @@ public class RealmAPI extends AbstractAPI {
 				JSONArray jarray = jsonobject.getJSONArray("realms");
 				for (int i = 0; i < jarray.length(); i++) {
 					jsonobject = jarray.getJSONObject(i);
-					names.add(jsonobject.getString("name"));
+					names.add(this.getRealm(jsonobject).getName());
 				}
 			}
 			log.debug("Success retreiving realm name list.");
@@ -100,5 +113,13 @@ public class RealmAPI extends AbstractAPI {
 		}
 		return names;
 	}
+	
+	private Realm getRealm(JSONObject jsonobject) throws JsonParseException, JsonMappingException, IOException{
+		Realm realm = new Realm();
+	    ObjectMapper mapper = new ObjectMapper();  
+	    realm = mapper.readValue(jsonobject.toString(), Realm.class);
+	    return realm;
+	}
+	
 
 }

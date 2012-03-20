@@ -1,8 +1,10 @@
 package ca.wowapi;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,13 +31,15 @@ public class ItemAPI extends AbstractAPI {
 	}
 
 	public Item getItem(String itemId, String region) throws InternalServerErrorException {
-		Item item = null;
+		Item item = new Item();;
 
 		String finalURL = ITEM_API_URL.replace("%region", region).replace("%id", itemId);
 		try {
 			JSONObject jsonobject = getJSONFromRequest(finalURL);
-			item = new Item();
-
+		    ObjectMapper mapper = new ObjectMapper();  
+		    item = mapper.readValue(jsonobject.toString(), Item.class);  
+//			item = new Item();
+/*
 			if (jsonobject.has("id")) {
 				item.setId(jsonobject.getInt("id"));
 			} else {
@@ -172,6 +176,7 @@ public class ItemAPI extends AbstractAPI {
 			if (jsonobject.has("isAuctionable")) {
 				item.setAuctionable(jsonobject.getBoolean("isAuctionable"));
 			}
+			*/
 		} catch (InternalServerErrorException e) {
 			throw e;
 		} catch (Exception e) {

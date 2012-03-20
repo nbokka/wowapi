@@ -1,5 +1,8 @@
 package ca.wowapi.entities;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class WeaponInfo {
 
 	private Damage damage;

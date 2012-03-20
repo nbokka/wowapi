@@ -3,6 +3,8 @@ package ca.wowapi.entities;
 import java.io.Serializable;
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Guild implements Serializable {
 
 	private static final long serialVersionUID = 1L;

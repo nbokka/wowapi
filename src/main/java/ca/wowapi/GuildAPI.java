@@ -3,10 +3,12 @@ package ca.wowapi;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ca.wowapi.entities.Achievement;
+import ca.wowapi.entities.Auction;
 import ca.wowapi.entities.Guild;
 
 public class GuildAPI extends AbstractAPI {
@@ -79,14 +81,19 @@ public class GuildAPI extends AbstractAPI {
 		String finalURL = GUILD_API_URL.replace("%region", region).replace("%realm", encode(realm)).replace("%name", encode(name));
 		try {
 			JSONObject jsonobject = getJSONFromRequest(finalURL, lastModified);
-
 			guild = new Guild();
+			
+		    ObjectMapper mapper = new ObjectMapper();  
+		    guild = mapper.readValue(jsonobject.toString(), Guild.class);
+		    
+		    
+			/*
 			guild.setName(jsonobject.getString("name"));
 			guild.setRealm(jsonobject.getString("realm"));
 			guild.setRegion(region);
 			guild.setLevel(jsonobject.getInt("level"));
 			guild.setPoints(jsonobject.getInt("achievementPoints"));
-
+			 */
 			if (jsonobject.getInt("side") == 0) {
 				guild.setFaction("Alliance");
 			} else if (jsonobject.getInt("side") == 1) {

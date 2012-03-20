@@ -1,15 +1,20 @@
 package ca.wowapi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import ca.wowapi.entities.Auction;
 import ca.wowapi.entities.AuctionData;
+import ca.wowapi.entities.Item;
 import ca.wowapi.exceptions.NotModifiedException;
 
 public class AuctionAPI extends AbstractAPI {
@@ -141,10 +146,14 @@ public class AuctionAPI extends AbstractAPI {
 		return auctionData;
 	}
 
-	private List<Auction> loadAuctions(JSONArray jAuctionList) throws JSONException {
+	private List<Auction> loadAuctions(JSONArray jAuctionList) throws JSONException, JsonParseException, JsonMappingException, IOException {
 		List<Auction> auctions = new ArrayList<Auction>(jAuctionList.length());
 		for (int j = 0; j < jAuctionList.length(); j++) {
 			Auction auctionItem = new Auction();
+			
+		    ObjectMapper mapper = new ObjectMapper();  
+		    auctionItem = mapper.readValue(jAuctionList.getJSONObject(j).toString(), Auction.class);
+		   /* 
 			auctionItem.setOwner(jAuctionList.getJSONObject(j).getString("owner"));
 			auctionItem.setBid(jAuctionList.getJSONObject(j).getLong("bid"));
 			auctionItem.setId(jAuctionList.getJSONObject(j).getLong("auc"));
@@ -152,6 +161,7 @@ public class AuctionAPI extends AbstractAPI {
 			auctionItem.setBuyout(jAuctionList.getJSONObject(j).getLong("buyout"));
 			auctionItem.setQuantity(jAuctionList.getJSONObject(j).getInt("quantity"));
 			auctionItem.setTimeLeft(jAuctionList.getJSONObject(j).getString("timeLeft"));
+			*/
 			auctions.add(auctionItem);
 		}
 		return auctions;

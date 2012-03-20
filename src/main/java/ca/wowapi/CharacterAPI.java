@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ca.wowapi.entities.Achievement;
 import ca.wowapi.entities.Character;
+import ca.wowapi.entities.Guild;
 
 public class CharacterAPI extends AbstractAPI {
 
@@ -119,13 +121,19 @@ public class CharacterAPI extends AbstractAPI {
 
 			if (null != jsonobject) {
 				character = new Character();
+				
+			    ObjectMapper mapper = new ObjectMapper();  
+			    character = mapper.readValue(jsonobject.toString(), Character.class);
+			    
+			    /*
 				character.setName(jsonobject.getString("name"));
 				character.setRealm(jsonobject.getString("realm"));
 				character.setRegion(region);
-				character.setCclass(CLASS_LIST.get(jsonobject.getInt("class")));
-				character.setRace(RACE_LIST.get(jsonobject.getInt("race")));
 				character.setLevel(jsonobject.getInt("level"));
 				character.setPoints(jsonobject.getInt("achievementPoints"));
+				*/
+				character.setCclass(CLASS_LIST.get(jsonobject.getInt("class")));
+				character.setRace(RACE_LIST.get(jsonobject.getInt("race")));
 				character.setGender(GENDER_LIST.get(jsonobject.getInt("gender")));
 				if (jsonobject.has("guild")) {
 					character.setGuildName(jsonobject.getJSONObject("guild").getString("name"));

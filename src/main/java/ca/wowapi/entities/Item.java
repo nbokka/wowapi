@@ -3,13 +3,15 @@ package ca.wowapi.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class Item implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private int baseArmor;
 
-	private BonusStats bonusStats;
+	private BonusStats[] bonusStats;
 
 	private long buyPrice;
 
@@ -73,7 +75,7 @@ public class Item implements Serializable {
 		return baseArmor;
 	}
 
-	public BonusStats getBonusStats() {
+	public BonusStats[] getBonusStats() {
 		return bonusStats;
 	}
 
@@ -193,7 +195,7 @@ public class Item implements Serializable {
 		this.baseArmor = baseArmor;
 	}
 
-	public void setBonusStats(BonusStats bonusStats) {
+	public void setBonusStats(BonusStats[] bonusStats) {
 		this.bonusStats = bonusStats;
 	}
 
